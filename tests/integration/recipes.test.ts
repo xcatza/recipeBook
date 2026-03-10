@@ -6,6 +6,7 @@ vi.mock('@/lib/parsers/spoonacular', () => ({
   resolveIngredientId: vi.fn().mockResolvedValue(null),
   analyzeRecipeFromUrl: vi.fn(),
   getIngredientSubstitutes: vi.fn(),
+  analyzeNutrition: vi.fn().mockResolvedValue(null),
 }))
 
 import { saveRecipe, getRecipes, getRecipe, deleteRecipe } from '@/lib/recipes'

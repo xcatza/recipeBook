@@ -36,6 +36,9 @@ export async function saveRecipe(parsed: ParsedRecipe, tags: string[] = []) {
   // Resolve Spoonacular IDs in background — non-blocking
   resolveSpoonacularIds(recipe.ingredients).catch(console.error)
 
+  // Fetch nutrition in background — non-blocking
+  fetchAndStoreNutrition(recipe.id, parsed).catch(console.error)
+
   return serialize(recipe)
 }
 
@@ -44,6 +47,12 @@ async function resolveSpoonacularIds(ingredients: Array<{ id: string; name: stri
     const id = await resolveIngredientId(ing.name)
     if (id) await prisma.ingredient.update({ where: { id: ing.id }, data: { spoonacularId: id } })
   }
+}
+
+async function fetchAndStoreNutrition(recipeId: string, parsed: ParsedRecipe) {
+  const { analyzeNutrition } = await import('./parsers/spoonacular')
+  const nutrition = await analyzeNutrition(parsed.title, parsed.ingredients, parsed.defaultServings)
+  if (nutrition) await storeNutrition(recipeId, nutrition)
 }
 
 export async function getRecipes() {
