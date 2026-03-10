@@ -52,6 +52,51 @@ export async function resolveIngredientId(name: string): Promise<number | null> 
   }
 }
 
+export type NutritionData = {
+  calories: number | null
+  protein: number | null
+  carbs: number | null
+  fat: number | null
+  fibre: number | null
+  sugar: number | null
+  sodium: number | null
+}
+
+export async function analyzeNutrition(
+  title: string,
+  ingredients: Array<{ name: string; quantity: number | null; unit: string | null }>,
+  servings: number
+): Promise<NutritionData | null> {
+  try {
+    const ingredientList = ingredients
+      .map((i) => `${i.quantity ?? ''} ${i.unit ?? ''} ${i.name}`.trim())
+      .join('\n')
+
+    const res = await fetch(`${BASE}/recipes/analyze?apiKey=${key()}&includeNutrition=true`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, ingredients: ingredientList, servings }),
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+
+    const nutrients: Array<{ name: string; amount: number }> = data.nutrition?.nutrients ?? []
+    const find = (n: string) => nutrients.find((x) => x.name === n)?.amount ?? null
+
+    return {
+      calories: find('Calories'),
+      protein: find('Protein'),
+      carbs: find('Carbohydrates'),
+      fat: find('Fat'),
+      fibre: find('Fiber'),
+      sugar: find('Sugar'),
+      sodium: find('Sodium'),
+    }
+  } catch {
+    return null
+  }
+}
+
 export async function getIngredientSubstitutes(spoonacularId: number): Promise<string[]> {
   try {
     const res = await fetch(`${BASE}/food/ingredients/${spoonacularId}/substitutes?apiKey=${key()}`)
