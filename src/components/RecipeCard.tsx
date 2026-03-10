@@ -7,7 +7,7 @@ type Nutrition = {
 
 type Props = { id: string; title: string; imageUrl: string | null; defaultServings: number; tags: string[]; nutrition: Nutrition; activeMacro: string | null }
 
-export function RecipeCard({ id, title, imageUrl, defaultServings, tags }: Props) {
+export function RecipeCard({ id, title, imageUrl, defaultServings, tags, nutrition, activeMacro }: Props) {
   return (
     <Link href={`/recipes/${id}`} className="block group animate-fade-up">
       <article className="overflow-hidden transition-all duration-300 group-hover:-translate-y-1" style={{ borderRadius: '4px' }}>
@@ -46,6 +46,21 @@ export function RecipeCard({ id, title, imageUrl, defaultServings, tags }: Props
           <p className="text-xs mt-1.5 tracking-wide uppercase" style={{ color: 'var(--color-ink-muted)', fontWeight: 500, letterSpacing: '0.08em' }}>
             Serves {defaultServings}
           </p>
+          {nutrition && (() => {
+            const macro = (activeMacro ?? 'calories') as keyof typeof nutrition
+            const value = nutrition[macro]
+            if (value === null) return null
+            const unit = macro === 'calories' ? 'kcal' : macro === 'sodium' ? 'mg' : 'g'
+            const label = macro.charAt(0).toUpperCase() + macro.slice(1)
+            return (
+              <p
+                className="text-xs mt-0.5 tracking-wide"
+                style={{ color: 'var(--color-terracotta)', fontWeight: 500, letterSpacing: '0.03em' }}
+              >
+                {Math.round(value)}{unit} {label}
+              </p>
+            )
+          })()}
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-3">
               {tags.map((tag) => (
