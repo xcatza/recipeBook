@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ServingControl } from './ServingControl'
 import { IngredientRow } from './IngredientRow'
+import { TagInput } from './TagInput'
 
 type Recipe = {
   id: string; title: string; description: string | null; imageUrl: string | null
@@ -25,7 +26,11 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [tags, setTags] = useState<string[]>(recipe.tags)
+  const [allTags, setAllTags] = useState<string[]>([])
+  const [tagsSaving, setTagsSaving] = useState(false)
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const tagsTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Auto-save notes after 800ms of inactivity
   function handleNotesChange(value: string) {
@@ -47,10 +52,35 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
     }
   }
 
+  // Fetch all tags on mount
+  useEffect(() => {
+    fetch('/api/tags').then((r) => r.json()).then(setAllTags).catch(() => {})
+  }, [])
+
   // Save on unmount if pending
   useEffect(() => {
-    return () => { if (saveTimeout.current) clearTimeout(saveTimeout.current) }
+    return () => {
+      if (saveTimeout.current) clearTimeout(saveTimeout.current)
+      if (tagsTimeout.current) clearTimeout(tagsTimeout.current)
+    }
   }, [])
+
+  function handleTagsChange(newTags: string[]) {
+    setTags(newTags)
+    if (tagsTimeout.current) clearTimeout(tagsTimeout.current)
+    tagsTimeout.current = setTimeout(async () => {
+      setTagsSaving(true)
+      try {
+        await fetch(`/api/recipes/${recipe.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tags: newTags }),
+        })
+      } finally {
+        setTagsSaving(false)
+      }
+    }, 800)
+  }
 
   async function handleFetchNutrition() {
     setFetchingNutrition(true)
@@ -168,24 +198,12 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
           </p>
         )}
 
-        {recipe.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-4">
-            {recipe.tags.map((tag) => (
-              <span
-                key={tag}
-                className="text-xs px-2 py-0.5"
-                style={{
-                  background: 'var(--color-sage-light)',
-                  color: 'var(--color-sage)',
-                  borderRadius: '2px',
-                  fontWeight: 500,
-                }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
+        <div className="mt-4">
+          <p className="text-xs tracking-wide uppercase mb-2" style={{ color: 'var(--color-ink-muted)', fontWeight: 600, letterSpacing: '0.1em' }}>
+            Taste Tags
+          </p>
+          <TagInput tags={tags} onChange={handleTagsChange} allTags={allTags} saving={tagsSaving} />
+        </div>
       </div>
 
       {/* Serving control */}
