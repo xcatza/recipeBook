@@ -1,9 +1,9 @@
-import { getRecipes } from '@/lib/recipes'
+import { getRecipes, getTags } from '@/lib/recipes'
 import { RecipeCollection } from '@/components/RecipeCollection'
 import Link from 'next/link'
 
 export default async function HomePage() {
-  const recipes = await getRecipes()
+  const [recipes, allTags] = await Promise.all([getRecipes(), getTags()])
   const hasRecipes = recipes.length > 0
 
   return (
@@ -41,7 +41,7 @@ export default async function HomePage() {
 
       {/* Content */}
       {hasRecipes ? (
-        <RecipeCollection recipes={recipes} />
+        <RecipeCollection recipes={recipes} allTags={allTags} />
       ) : (
         <div className="animate-fade-up" style={{ animationDelay: '200ms' }}>
           <div className="text-center py-24">
