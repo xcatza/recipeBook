@@ -15,9 +15,24 @@ model Recipe {
   imageUrl        String?
   defaultServings Int
   steps           String          // JSON-serialized string[]
+  notes           String?
   createdAt       DateTime        @default(now())
   ingredients     Ingredient[]
   tags            TagsOnRecipes[]
+  nutrition       Nutrition?
+}
+
+model Nutrition {
+  id       String @id @default(cuid())
+  recipeId String @unique
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  calories Float?
+  protein  Float?
+  carbs    Float?
+  fat      Float?
+  fibre    Float?
+  sugar    Float?
+  sodium   Float?
 }
 
 model Ingredient {
