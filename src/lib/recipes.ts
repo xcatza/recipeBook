@@ -30,7 +30,7 @@ export async function saveRecipe(parsed: ParsedRecipe, tags: string[] = []) {
         })),
       },
     },
-    include: { ingredients: true, tags: { include: { tag: true } } },
+    include: { ingredients: true, tags: { include: { tag: true } }, nutrition: true },
   })
 
   // Resolve Spoonacular IDs in background — non-blocking
@@ -48,7 +48,7 @@ async function resolveSpoonacularIds(ingredients: Array<{ id: string; name: stri
 
 export async function getRecipes() {
   const recipes = await prisma.recipe.findMany({
-    include: { ingredients: true, tags: { include: { tag: true } } },
+    include: { ingredients: true, tags: { include: { tag: true } }, nutrition: true },
     orderBy: { createdAt: 'desc' },
   })
   return recipes.map(serialize)
@@ -57,9 +57,34 @@ export async function getRecipes() {
 export async function getRecipe(id: string) {
   const recipe = await prisma.recipe.findUnique({
     where: { id },
-    include: { ingredients: true, tags: { include: { tag: true } } },
+    include: { ingredients: true, tags: { include: { tag: true } }, nutrition: true },
   })
   return recipe ? serialize(recipe) : null
+}
+
+export async function updateRecipe(id: string, data: { notes?: string | null }) {
+  const recipe = await prisma.recipe.update({
+    where: { id },
+    data,
+    include: { ingredients: true, tags: { include: { tag: true } }, nutrition: true },
+  })
+  return serialize(recipe)
+}
+
+export async function storeNutrition(recipeId: string, data: {
+  calories: number | null; protein: number | null; carbs: number | null
+  fat: number | null; fibre: number | null; sugar: number | null; sodium: number | null
+}) {
+  await prisma.nutrition.upsert({
+    where: { recipeId },
+    create: { recipeId, ...data },
+    update: data,
+  })
+  const recipe = await prisma.recipe.findUniqueOrThrow({
+    where: { id: recipeId },
+    include: { ingredients: true, tags: { include: { tag: true } }, nutrition: true },
+  })
+  return serialize(recipe)
 }
 
 export async function deleteRecipe(id: string) {
@@ -71,5 +96,16 @@ function serialize(recipe: any) {
     ...recipe,
     steps: JSON.parse(recipe.steps) as string[],
     tags: recipe.tags.map((t: any) => t.tag.name),
+    nutrition: recipe.nutrition
+      ? {
+          calories: recipe.nutrition.calories,
+          protein: recipe.nutrition.protein,
+          carbs: recipe.nutrition.carbs,
+          fat: recipe.nutrition.fat,
+          fibre: recipe.nutrition.fibre,
+          sugar: recipe.nutrition.sugar,
+          sodium: recipe.nutrition.sodium,
+        }
+      : null,
   }
 }
