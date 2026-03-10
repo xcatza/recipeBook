@@ -1,6 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { TagInput } from './TagInput'
 
 type ParsedRecipe = {
   title: string; description: string | null; imageUrl: string | null
@@ -14,6 +15,12 @@ export function RecipeReviewForm({ recipe, onCancel }: { recipe: ParsedRecipe; o
   const [form, setForm] = useState(recipe)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [tags, setTags] = useState<string[]>([])
+  const [allTags, setAllTags] = useState<string[]>([])
+
+  useEffect(() => {
+    fetch('/api/tags').then((r) => r.json()).then(setAllTags).catch(() => {})
+  }, [])
 
   async function handleSave() {
     setSaving(true)
@@ -22,7 +29,7 @@ export function RecipeReviewForm({ recipe, onCancel }: { recipe: ParsedRecipe; o
       const res = await fetch('/api/recipes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipe: form }),
+        body: JSON.stringify({ recipe: form, tags }),
       })
       if (!res.ok) { setError('Failed to save recipe'); return }
       const saved = await res.json()
@@ -89,6 +96,17 @@ export function RecipeReviewForm({ recipe, onCancel }: { recipe: ParsedRecipe; o
             />
           </div>
         </div>
+      </div>
+
+      {/* Tags */}
+      <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '1.5rem', marginBottom: '0.5rem' }}>
+        <label
+          className="block text-xs tracking-wide uppercase mb-3"
+          style={{ color: 'var(--color-ink-muted)', fontWeight: 600, letterSpacing: '0.1em' }}
+        >
+          Taste Tags <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
+        </label>
+        <TagInput tags={tags} onChange={setTags} allTags={allTags} />
       </div>
 
       {/* Ingredients */}
