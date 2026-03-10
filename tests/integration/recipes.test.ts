@@ -9,7 +9,7 @@ vi.mock('@/lib/parsers/spoonacular', () => ({
   fetchNutritionFromUrl: vi.fn().mockResolvedValue(null),
 }))
 
-import { saveRecipe, getRecipes, getRecipe, deleteRecipe, getTags } from '@/lib/recipes'
+import { saveRecipe, getRecipes, getRecipe, deleteRecipe, getTags, updateTags } from '@/lib/recipes'
 
 // Clean up test data after each test
 afterEach(async () => {
@@ -63,6 +63,17 @@ describe('Recipe service', () => {
     expect(tags).toContain('quick')
     expect(tags).toContain('spicy')
     expect(tags.filter((t: string) => t === 'quick')).toHaveLength(1)
+  })
+
+  it('updateTags replaces recipe tags', async () => {
+    const saved = await saveRecipe({ ...testRecipe, sourceUrl: 'https://tags.com' }, ['italian'])
+    expect(saved.tags).toEqual(['italian'])
+
+    const { updateTags } = await import('@/lib/recipes')
+    const updated = await updateTags(saved.id, ['quick', 'spicy'])
+    expect(updated.tags).toContain('quick')
+    expect(updated.tags).toContain('spicy')
+    expect(updated.tags).not.toContain('italian')
   })
 
   it('stores and retrieves nutrition data', async () => {

@@ -105,6 +105,25 @@ export async function deleteRecipe(id: string) {
   await prisma.recipe.delete({ where: { id } })
 }
 
+export async function updateTags(id: string, tags: string[]) {
+  await prisma.tagsOnRecipes.deleteMany({ where: { recipeId: id } })
+  await prisma.recipe.update({
+    where: { id },
+    data: {
+      tags: {
+        create: tags.map((name) => ({
+          tag: { connectOrCreate: { where: { name }, create: { name } } },
+        })),
+      },
+    },
+  })
+  const recipe = await prisma.recipe.findUniqueOrThrow({
+    where: { id },
+    include: { ingredients: true, tags: { include: { tag: true } }, nutrition: true },
+  })
+  return serialize(recipe)
+}
+
 export async function getTags(): Promise<string[]> {
   const tags = await prisma.tag.findMany({ orderBy: { name: 'asc' } })
   return tags.map((t) => t.name)
