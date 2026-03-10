@@ -105,6 +105,11 @@ export async function deleteRecipe(id: string) {
   await prisma.recipe.delete({ where: { id } })
 }
 
+export async function getTags(): Promise<string[]> {
+  const tags = await prisma.tag.findMany({ orderBy: { name: 'asc' } })
+  return tags.map((t) => t.name)
+}
+
 function serialize(recipe: any) {
   return {
     ...recipe,
