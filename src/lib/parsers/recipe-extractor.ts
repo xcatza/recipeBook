@@ -1,4 +1,4 @@
-import type { ParsedRecipe, ParsedIngredient } from './types'
+import type { ParsedRecipe, ParsedIngredient, ParsedNutrition } from './types'
 
 function parseIngredientString(raw: string): ParsedIngredient {
   const match = raw.match(/^([\d./]+)?\s*([a-zA-Z]+)?\s+(.+)$/)
@@ -10,6 +10,25 @@ function parseIngredientString(raw: string): ParsedIngredient {
     unit: unit || null,
     name: name.trim(),
     notes: notesParts.join(',').trim() || null,
+  }
+}
+
+function parseGrams(val: any): number | null {
+  if (val == null) return null
+  const n = parseFloat(String(val).replace(/[^0-9.]/g, ''))
+  return isNaN(n) ? null : n
+}
+
+function parseNutrition(n: any): ParsedNutrition | null {
+  if (!n || n['@type'] !== 'NutritionInformation') return null
+  return {
+    calories: parseGrams(n.calories),
+    protein: parseGrams(n.proteinContent),
+    carbs: parseGrams(n.carbohydrateContent),
+    fat: parseGrams(n.fatContent),
+    fibre: parseGrams(n.fiberContent),
+    sugar: parseGrams(n.sugarContent),
+    sodium: parseGrams(n.sodiumContent),
   }
 }
 
@@ -86,6 +105,7 @@ export async function extractRecipeFromUrl(url: string): Promise<ParsedRecipe | 
       ingredients,
       steps,
       sourceUrl: url,
+      nutrition: parseNutrition(recipeData.nutrition),
     }
   } catch {
     return null

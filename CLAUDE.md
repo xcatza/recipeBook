@@ -2,7 +2,7 @@
 
 ## Commands
 
-- `npm run dev` — start dev server at http://localhost:3000
+- `npm run dev` — start dev server at http://localhost:3001
 - `npm test` — run unit and integration tests (Vitest)
 - `npm run test:e2e` — run E2E tests (Playwright, requires dev server)
 - `npx prisma studio` — open database browser

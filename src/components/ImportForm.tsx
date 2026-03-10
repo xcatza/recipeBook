@@ -33,17 +33,62 @@ export function ImportForm({ onParsed }: { onParsed: (r: ParsedRecipe) => void }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">Recipe or Instagram URL</label>
-        <input id="url" type="url" value={url} onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://..." required
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <label
+          htmlFor="url"
+          className="block text-xs tracking-wide uppercase mb-2"
+          style={{ color: 'var(--color-ink-muted)', fontWeight: 600, letterSpacing: '0.1em' }}
+        >
+          Recipe URL
+        </label>
+        <div className="relative">
+          <input
+            id="url"
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://www.example.com/recipe..."
+            required
+            className="w-full px-4 py-3.5 text-sm outline-none transition-all duration-200"
+            style={{
+              background: 'var(--color-warm-white)',
+              border: '1px solid var(--color-border)',
+              borderRadius: '2px',
+              color: 'var(--color-ink)',
+              fontFamily: 'var(--font-body)',
+            }}
+            onFocus={(e) => e.currentTarget.style.borderColor = 'var(--color-terracotta)'}
+            onBlur={(e) => e.currentTarget.style.borderColor = 'var(--color-border)'}
+          />
+        </div>
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <button type="submit" disabled={loading}
-        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-medium">
-        {loading ? 'Importing...' : 'Import'}
+      {error && (
+        <p className="text-sm py-2 px-3" style={{ color: '#b44a3e', background: '#fef2f0', borderRadius: '2px' }}>
+          {error}
+        </p>
+      )}
+      <button
+        type="submit"
+        disabled={loading}
+        className="flex items-center gap-2 px-6 py-3 text-sm font-medium transition-all duration-200 disabled:opacity-50"
+        style={{
+          background: 'var(--color-terracotta)',
+          color: 'var(--color-warm-white)',
+          borderRadius: '2px',
+        }}
+      >
+        {loading ? (
+          <>
+            <svg className="animate-spin" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" opacity="0.3"/>
+              <path d="M14 8a6 6 0 00-6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            Importing...
+          </>
+        ) : (
+          'Import Recipe'
+        )}
       </button>
     </form>
   )

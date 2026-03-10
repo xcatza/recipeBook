@@ -29,7 +29,7 @@ export function RecipeCollection({ recipes }: { recipes: Recipe[] }) {
 
   return (
     <>
-      {recipes.length > 1 && <SortBar sort={sort} onChange={setSort} />}
+      <SortBar sort={sort} onChange={setSort} />
       <RecipeGrid recipes={sorted} activeMacro={sort?.macro ?? null} />
     </>
   )

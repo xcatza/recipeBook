@@ -1,6 +1,6 @@
 import type { ParsedRecipe, ParsedIngredient } from './types'
 
-const RAPIDAPI_HOST = 'instagram-scraper-api2.p.rapidapi.com'
+const RAPIDAPI_HOST = 'instagram-scraper21.p.rapidapi.com'
 
 export async function fetchInstagramPost(
   url: string
@@ -13,7 +13,7 @@ export async function fetchInstagramPost(
   const shortcode = match[2]
 
   const res = await fetch(
-    `https://${RAPIDAPI_HOST}/v1/post_info?code_or_id_or_url=${shortcode}`,
+    `https://${RAPIDAPI_HOST}/post_info?shortcode=${shortcode}`,
     {
       headers: {
         'X-RapidAPI-Key': apiKey,
@@ -24,10 +24,10 @@ export async function fetchInstagramPost(
   if (!res.ok) return null
   const data = await res.json()
 
-  return {
-    caption: data.data?.caption?.text ?? '',
-    imageUrl: data.data?.thumbnail_url ?? data.data?.image_url ?? null,
-  }
+  const caption = data.caption?.text ?? data.data?.caption?.text ?? ''
+  const imageUrl = data.display_url ?? data.thumbnail_src ?? data.data?.thumbnail_url ?? null
+
+  return { caption, imageUrl }
 }
 
 function parseIngredientLine(line: string): ParsedIngredient {
@@ -71,5 +71,6 @@ export function extractRecipeFromCaption(caption: string, sourceUrl: string): Pa
     ingredients,
     steps,
     sourceUrl,
+    nutrition: null,
   }
 }

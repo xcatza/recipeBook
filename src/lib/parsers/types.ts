@@ -5,6 +5,16 @@ export type ParsedIngredient = {
   notes: string | null
 }
 
+export type ParsedNutrition = {
+  calories: number | null
+  protein: number | null
+  carbs: number | null
+  fat: number | null
+  fibre: number | null
+  sugar: number | null
+  sodium: number | null
+}
+
 export type ParsedRecipe = {
   title: string
   description: string | null
@@ -13,4 +23,5 @@ export type ParsedRecipe = {
   ingredients: ParsedIngredient[]
   steps: string[]
   sourceUrl: string
+  nutrition: ParsedNutrition | null
 }

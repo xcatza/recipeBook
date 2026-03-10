@@ -36,8 +36,13 @@ export async function saveRecipe(parsed: ParsedRecipe, tags: string[] = []) {
   // Resolve Spoonacular IDs in background — non-blocking
   resolveSpoonacularIds(recipe.ingredients).catch(console.error)
 
-  // Fetch nutrition in background — non-blocking
-  fetchAndStoreNutrition(recipe.id, parsed).catch(console.error)
+  if (parsed.nutrition) {
+    // Store nutrition extracted directly from the page (no API call needed)
+    storeNutrition(recipe.id, parsed.nutrition).catch(console.error)
+  } else {
+    // Fall back to Spoonacular nutrition fetch in background
+    fetchAndStoreNutrition(recipe.id, parsed.sourceUrl).catch(console.error)
+  }
 
   return serialize(recipe)
 }
@@ -49,9 +54,9 @@ async function resolveSpoonacularIds(ingredients: Array<{ id: string; name: stri
   }
 }
 
-async function fetchAndStoreNutrition(recipeId: string, parsed: ParsedRecipe) {
-  const { analyzeNutrition } = await import('./parsers/spoonacular')
-  const nutrition = await analyzeNutrition(parsed.title, parsed.ingredients, parsed.defaultServings)
+async function fetchAndStoreNutrition(recipeId: string, sourceUrl: string) {
+  const { fetchNutritionFromUrl } = await import('./parsers/spoonacular')
+  const nutrition = await fetchNutritionFromUrl(sourceUrl)
   if (nutrition) await storeNutrition(recipeId, nutrition)
 }
 

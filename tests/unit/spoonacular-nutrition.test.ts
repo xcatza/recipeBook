@@ -4,12 +4,12 @@ const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)
 vi.stubEnv('SPOONACULAR_API_KEY', 'test-key')
 
-import { analyzeNutrition } from '@/lib/parsers/spoonacular'
+import { fetchNutritionFromUrl } from '@/lib/parsers/spoonacular'
 
-describe('analyzeNutrition', () => {
+describe('fetchNutritionFromUrl', () => {
   beforeEach(() => { mockFetch.mockReset() })
 
-  it('parses nutrition from Spoonacular response', async () => {
+  it('parses nutrition from Spoonacular extract response', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
@@ -27,9 +27,7 @@ describe('analyzeNutrition', () => {
       }),
     })
 
-    const result = await analyzeNutrition('Test Recipe', [
-      { name: 'chicken', quantity: 200, unit: 'g' },
-    ], 2)
+    const result = await fetchNutritionFromUrl('https://example.com/recipe')
 
     expect(result).toEqual({
       calories: 450,
@@ -41,12 +39,13 @@ describe('analyzeNutrition', () => {
       sodium: 400,
     })
     expect(mockFetch).toHaveBeenCalledOnce()
-    expect(mockFetch.mock.calls[0][0]).toContain('/recipes/analyze')
+    expect(mockFetch.mock.calls[0][0]).toContain('/recipes/extract')
+    expect(mockFetch.mock.calls[0][0]).toContain('includeNutrition=true')
   })
 
   it('returns null on API failure', async () => {
     mockFetch.mockResolvedValueOnce({ ok: false })
-    const result = await analyzeNutrition('Fail', [], 1)
+    const result = await fetchNutritionFromUrl('https://example.com/fail')
     expect(result).toBeNull()
   })
 })

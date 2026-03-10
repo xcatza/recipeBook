@@ -33,6 +33,7 @@ export async function analyzeRecipeFromUrl(url: string): Promise<ParsedRecipe | 
       ingredients,
       steps,
       sourceUrl: url,
+      nutrition: null,
     }
   } catch {
     return null
@@ -62,21 +63,11 @@ export type NutritionData = {
   sodium: number | null
 }
 
-export async function analyzeNutrition(
-  title: string,
-  ingredients: Array<{ name: string; quantity: number | null; unit: string | null }>,
-  servings: number
-): Promise<NutritionData | null> {
+export async function fetchNutritionFromUrl(url: string): Promise<NutritionData | null> {
   try {
-    const ingredientList = ingredients
-      .map((i) => `${i.quantity ?? ''} ${i.unit ?? ''} ${i.name}`.trim())
-      .join('\n')
-
-    const res = await fetch(`${BASE}/recipes/analyze?apiKey=${key()}&includeNutrition=true`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, ingredients: ingredientList, servings }),
-    })
+    const res = await fetch(
+      `${BASE}/recipes/extract?apiKey=${key()}&url=${encodeURIComponent(url)}&includeNutrition=true&forceExtraction=false`
+    )
     if (!res.ok) return null
     const data = await res.json()
 

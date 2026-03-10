@@ -8,7 +8,12 @@
       "Bash(npm test:*)",
       "Bash(git init:*)",
       "Bash(git status:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npm ls:*)",
+      "Bash(ls:*)"
     ]
   }
 }
