@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Recipe Book
 
-## Getting Started
+A personal recipe collection app. Import recipes from any URL or Instagram post, browse your collection, and find out what you can cook with what's in your kitchen.
 
-First, run the development server:
+## Quick start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/xcatza/recipeBook.git
+cd recipeBook
+cp .env.local.example .env.local   # fill in your API keys (see below)
+npm run setup                       # install deps + run DB migrations
+npm run dev                         # http://localhost:3001
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copy `.env.local.example` to `.env.local` and fill in:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Where to get it |
+|----------|----------------|
+| `SPOONACULAR_API_KEY` | [spoonacular.com/food-api](https://spoonacular.com/food-api) — free tier |
+| `RAPIDAPI_KEY` | [rapidapi.com](https://rapidapi.com) — for Instagram scraping, free tier |
 
-## Learn More
+The database URL is already configured in `.env` — no changes needed there.
 
-To learn more about Next.js, take a look at the following resources:
+## What `npm run setup` does
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. `npm install` — installs dependencies
+2. `prisma migrate deploy` — creates `dev.db` and applies all schema migrations
+3. `prisma generate` — generates the Prisma client
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Run it again any time you pull changes that include new migrations.
 
-## Deploy on Vercel
+## Commands
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server at http://localhost:3001 |
+| `npm run setup` | First-time setup: install deps + init DB |
+| `npm test` | Run unit and integration tests |
+| `npm run test:e2e` | Run E2E tests (requires dev server running) |
+| `npx prisma studio` | Browse the database in your browser |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Features
+
+- Import recipes from any website or Instagram post
+- Browse your collection, filter by taste tags
+- Edit tags and nutrition info on any recipe
+- "What can I cook?" — enter what's in your kitchen, see recipes ranked by how many ingredients you already have
