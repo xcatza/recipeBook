@@ -87,6 +87,7 @@ export function NutritionForm({ initialValues = {}, onSave, onCancel, saving }: 
       </div>
       <div className="flex gap-2 pt-1">
         <button
+          type="button"
           onClick={handleSave}
           disabled={saving}
           className="px-4 py-2 text-sm font-medium transition-all duration-200 disabled:opacity-50"
