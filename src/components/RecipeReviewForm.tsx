@@ -20,10 +20,37 @@ export function RecipeReviewForm({ recipe, onCancel }: { recipe: ParsedRecipe; o
   const [allTags, setAllTags] = useState<string[]>([])
   const [showNutrition, setShowNutrition] = useState(false)
   const [nutrition, setNutrition] = useState<NutritionValues | null>(null)
+  const [fetchingNutrition, setFetchingNutrition] = useState(false)
+  const [nutritionFetchError, setNutritionFetchError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/tags').then((r) => r.json()).then(setAllTags).catch(() => {})
   }, [])
+
+  async function handleFetchNutrition() {
+    setFetchingNutrition(true)
+    setNutritionFetchError(null)
+    try {
+      const res = await fetch('/api/nutrition/fetch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: form.sourceUrl }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setNutrition(data)
+        setShowNutrition(false)
+      } else {
+        setNutritionFetchError('Could not fetch nutrition from this source.')
+        setShowNutrition(true)
+      }
+    } catch {
+      setNutritionFetchError('Network error.')
+      setShowNutrition(true)
+    } finally {
+      setFetchingNutrition(false)
+    }
+  }
 
   async function handleSave() {
     setSaving(true)
@@ -131,16 +158,30 @@ export function RecipeReviewForm({ recipe, onCancel }: { recipe: ParsedRecipe; o
               Remove
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={() => setShowNutrition(true)}
-              className="text-xs transition-colors duration-200"
-              style={{ color: 'var(--color-sage)', fontWeight: 500 }}
-            >
-              Add nutrition ↓
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleFetchNutrition}
+                disabled={fetchingNutrition}
+                className="text-xs transition-colors duration-200 disabled:opacity-50"
+                style={{ color: 'var(--color-sage)', fontWeight: 500 }}
+              >
+                {fetchingNutrition ? 'Fetching...' : 'Fetch from source'}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setShowNutrition(true); setNutritionFetchError(null) }}
+                className="text-xs transition-colors duration-200"
+                style={{ color: 'var(--color-ink-muted)' }}
+              >
+                Enter manually ↓
+              </button>
+            </div>
           )}
         </div>
+        {nutritionFetchError && !showNutrition && (
+          <p className="text-xs mb-2" style={{ color: '#b44a3e' }}>{nutritionFetchError}</p>
+        )}
         {showNutrition && (
           <NutritionForm
             initialValues={nutrition ?? {}}
