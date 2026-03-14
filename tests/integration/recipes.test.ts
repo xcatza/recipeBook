@@ -138,17 +138,8 @@ describe('Recipe service', () => {
     ]}, [])
 
     const names = await getIngredientNames()
-    expect(names).toContain('apple')
-    expect(names).toContain('Zucchini')
-    expect(names).toContain('Banana')
-    // Unique: 'apple' appears only once
-    expect(names.filter(n => n === 'apple').length).toBe(1)
     // Sorted ascending (SQLite ASCII order: uppercase before lowercase)
     // ASCII order: Banana (B=66) < Zucchini (Z=90) < apple (a=97)
-    const appleIdx = names.indexOf('apple')
-    const bananaIdx = names.indexOf('Banana')
-    const zucchiniIdx = names.indexOf('Zucchini')
-    expect(bananaIdx).toBeLessThan(zucchiniIdx)
-    expect(zucchiniIdx).toBeLessThan(appleIdx)
+    expect(names).toEqual(['Banana', 'Zucchini', 'apple'])
   })
 })
