@@ -16,7 +16,7 @@ import { analyzeRecipeFromUrl } from '@/lib/parsers/spoonacular'
 const mockRecipe = {
   title: 'Pasta', description: null, imageUrl: null,
   defaultServings: 4, ingredients: [], steps: ['Boil water'],
-  sourceUrl: 'https://example.com/pasta',
+  sourceUrl: 'https://example.com/pasta', nutrition: null,
 }
 
 describe('parseRecipeUrl', () => {

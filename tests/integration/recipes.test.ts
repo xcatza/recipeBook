@@ -30,6 +30,7 @@ const testRecipe = {
   ],
   steps: ['Boil water', 'Cook pasta'],
   sourceUrl: 'https://example.com/pasta',
+  nutrition: null,
 }
 
 describe('Recipe service', () => {
