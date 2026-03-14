@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { TagInput } from './TagInput'
+import { NutritionForm, type NutritionValues } from './NutritionForm'
 
 type ParsedRecipe = {
   title: string; description: string | null; imageUrl: string | null
@@ -17,6 +18,8 @@ export function RecipeReviewForm({ recipe, onCancel }: { recipe: ParsedRecipe; o
   const [error, setError] = useState<string | null>(null)
   const [tags, setTags] = useState<string[]>([])
   const [allTags, setAllTags] = useState<string[]>([])
+  const [showNutrition, setShowNutrition] = useState(false)
+  const [nutrition, setNutrition] = useState<NutritionValues | null>(null)
 
   useEffect(() => {
     fetch('/api/tags').then((r) => r.json()).then(setAllTags).catch(() => {})
@@ -29,7 +32,7 @@ export function RecipeReviewForm({ recipe, onCancel }: { recipe: ParsedRecipe; o
       const res = await fetch('/api/recipes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipe: form, tags }),
+        body: JSON.stringify({ recipe: { ...form, nutrition: null }, tags, nutrition }),
       })
       if (!res.ok) { setError('Failed to save recipe'); return }
       const saved = await res.json()
@@ -107,6 +110,56 @@ export function RecipeReviewForm({ recipe, onCancel }: { recipe: ParsedRecipe; o
           Taste Tags <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
         </label>
         <TagInput tags={tags} onChange={setTags} allTags={allTags} />
+      </div>
+
+      {/* Nutrition */}
+      <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '1.5rem', marginBottom: '0.5rem' }}>
+        <div className="flex items-center justify-between mb-3">
+          <label
+            className="block text-xs tracking-wide uppercase"
+            style={{ color: 'var(--color-ink-muted)', fontWeight: 600, letterSpacing: '0.1em' }}
+          >
+            Nutrition <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
+          </label>
+          {showNutrition ? (
+            <button
+              type="button"
+              onClick={() => { setShowNutrition(false); setNutrition(null) }}
+              className="text-xs transition-colors duration-200"
+              style={{ color: 'var(--color-ink-muted)' }}
+            >
+              Remove
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowNutrition(true)}
+              className="text-xs transition-colors duration-200"
+              style={{ color: 'var(--color-sage)', fontWeight: 500 }}
+            >
+              Add nutrition ↓
+            </button>
+          )}
+        </div>
+        {showNutrition && (
+          <NutritionForm
+            onSave={(data) => { setNutrition(data); setShowNutrition(false) }}
+            onCancel={() => { setShowNutrition(false); setNutrition(null) }}
+          />
+        )}
+        {nutrition && !showNutrition && (
+          <p className="text-xs" style={{ color: 'var(--color-sage)' }}>
+            ✓ Nutrition added ({nutrition.calories ?? '—'} kcal)
+            <button
+              type="button"
+              onClick={() => setShowNutrition(true)}
+              className="ml-2 underline"
+              style={{ color: 'var(--color-ink-muted)' }}
+            >
+              Edit
+            </button>
+          </p>
+        )}
       </div>
 
       {/* Ingredients */}
