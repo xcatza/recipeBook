@@ -28,6 +28,14 @@ const FIELDS: { key: keyof NutritionValues; label: string; unit: string }[] = [
   { key: 'sodium',   label: 'Sodium',   unit: 'mg' },
 ]
 
+const inputStyle = {
+  background: 'var(--color-warm-white)',
+  border: '1px solid var(--color-border)',
+  borderRadius: '2px',
+  color: 'var(--color-ink)',
+  width: '100%',
+}
+
 function toStr(v: number | null | undefined): string {
   return v == null ? '' : String(v)
 }
@@ -38,23 +46,16 @@ function toNum(v: string): number | null {
 }
 
 export function NutritionForm({ initialValues = {}, onSave, onCancel, saving }: Props) {
-  const [values, setValues] = useState<Record<string, string>>(() =>
-    Object.fromEntries(FIELDS.map((f) => [f.key, toStr(initialValues[f.key])]))
+  const [values, setValues] = useState<Record<keyof NutritionValues, string>>(() =>
+    Object.fromEntries(FIELDS.map((f) => [f.key, toStr(initialValues[f.key])])) as Record<keyof NutritionValues, string>
   )
 
   function handleSave() {
+    if (saving) return
     const data = Object.fromEntries(
       FIELDS.map((f) => [f.key, toNum(values[f.key])])
     ) as NutritionValues
     onSave(data)
-  }
-
-  const inputStyle = {
-    background: 'var(--color-warm-white)',
-    border: '1px solid var(--color-border)',
-    borderRadius: '2px',
-    color: 'var(--color-ink)',
-    width: '100%',
   }
 
   return (
@@ -63,17 +64,19 @@ export function NutritionForm({ initialValues = {}, onSave, onCancel, saving }: 
         {FIELDS.map(({ key, label, unit }) => (
           <div key={key}>
             <label
+              htmlFor={`nutrition-${key}`}
               className="block text-xs mb-1"
               style={{ color: 'var(--color-ink-muted)', fontWeight: 600, letterSpacing: '0.05em' }}
             >
               {label} <span style={{ fontWeight: 400, color: 'var(--color-sage)' }}>({unit})</span>
             </label>
             <input
+              id={`nutrition-${key}`}
               type="number"
               min={0}
+              step="any"
               value={values[key]}
               onChange={(e) => setValues({ ...values, [key]: e.target.value })}
-              placeholder="—"
               className="px-3 py-2 text-sm outline-none"
               style={inputStyle}
               onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--color-terracotta)')}
