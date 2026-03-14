@@ -5,9 +5,10 @@ type Props = {
   allIngredients: string[]
   pantry: string[]
   onChange: (pantry: string[]) => void
+  inputId?: string
 }
 
-export function IngredientAutocomplete({ allIngredients, pantry, onChange }: Props) {
+export function IngredientAutocomplete({ allIngredients, pantry, onChange, inputId }: Props) {
   const [input, setInput] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -83,6 +84,7 @@ export function IngredientAutocomplete({ allIngredients, pantry, onChange }: Pro
       <div className="relative">
         <input
           ref={inputRef}
+          id={inputId}
           type="text"
           value={input}
           onChange={(e) => { setInput(e.target.value); setShowSuggestions(true) }}

@@ -33,7 +33,7 @@ export default async function HomePage() {
             ) : (
               <span
                 className="text-sm"
-                style={{ color: 'var(--color-border)', cursor: 'default' }}
+                style={{ color: 'var(--color-ink-muted)', cursor: 'default', pointerEvents: 'none' }}
                 title="Import recipes first"
               >
                 What can I cook?

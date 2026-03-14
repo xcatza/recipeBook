@@ -42,6 +42,7 @@ export function CookPage({ recipes, ingredientNames }: Props) {
         }}
       >
         <label
+          htmlFor="pantry-input"
           className="block text-xs tracking-wide uppercase mb-3"
           style={{ color: 'var(--color-ink-muted)', fontWeight: 600, letterSpacing: '0.1em' }}
         >
@@ -51,6 +52,7 @@ export function CookPage({ recipes, ingredientNames }: Props) {
           allIngredients={ingredientNames}
           pantry={pantry}
           onChange={setPantry}
+          inputId="pantry-input"
         />
       </section>
 
