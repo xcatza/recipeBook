@@ -129,6 +129,15 @@ export async function getTags(): Promise<string[]> {
   return tags.map((t) => t.name)
 }
 
+export async function getIngredientNames(): Promise<string[]> {
+  const rows = await prisma.ingredient.findMany({
+    select: { name: true },
+    distinct: ['name'],
+    orderBy: { name: 'asc' },
+  })
+  return rows.map((r) => r.name)
+}
+
 function serialize(recipe: any) {
   return {
     ...recipe,

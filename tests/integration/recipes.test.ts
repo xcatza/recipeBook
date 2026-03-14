@@ -9,7 +9,7 @@ vi.mock('@/lib/parsers/spoonacular', () => ({
   fetchNutritionFromUrl: vi.fn().mockResolvedValue(null),
 }))
 
-import { saveRecipe, getRecipes, getRecipe, deleteRecipe, getTags, updateTags, storeNutrition } from '@/lib/recipes'
+import { saveRecipe, getRecipes, getRecipe, deleteRecipe, getTags, updateTags, storeNutrition, getIngredientNames } from '@/lib/recipes'
 
 // Clean up test data after each test
 afterEach(async () => {
@@ -125,5 +125,30 @@ describe('Recipe service', () => {
     const all = await getRecipes()
     const found = all.find((r: any) => r.id === saved.id)
     expect(found?.nutrition?.calories).toBe(450)
+  })
+
+  it('getIngredientNames returns sorted unique ingredient names', async () => {
+    await saveRecipe({ ...testRecipe, title: 'Recipe A', ingredients: [
+      { name: 'Zucchini', quantity: 1, unit: null, notes: null },
+      { name: 'apple', quantity: 2, unit: null, notes: null },
+    ]}, [])
+    await saveRecipe({ ...testRecipe, title: 'Recipe B', ingredients: [
+      { name: 'apple', quantity: 1, unit: null, notes: null },
+      { name: 'Banana', quantity: 1, unit: null, notes: null },
+    ]}, [])
+
+    const names = await getIngredientNames()
+    expect(names).toContain('apple')
+    expect(names).toContain('Zucchini')
+    expect(names).toContain('Banana')
+    // Unique: 'apple' appears only once
+    expect(names.filter(n => n === 'apple').length).toBe(1)
+    // Sorted ascending (SQLite ASCII order: uppercase before lowercase)
+    // ASCII order: Banana (B=66) < Zucchini (Z=90) < apple (a=97)
+    const appleIdx = names.indexOf('apple')
+    const bananaIdx = names.indexOf('Banana')
+    const zucchiniIdx = names.indexOf('Zucchini')
+    expect(bananaIdx).toBeLessThan(zucchiniIdx)
+    expect(zucchiniIdx).toBeLessThan(appleIdx)
   })
 })
