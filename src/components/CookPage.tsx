@@ -66,7 +66,7 @@ export function CookPage({ recipes, ingredientNames }: Props) {
               className="text-xs tracking-wide uppercase mb-5"
               style={{ color: 'var(--color-ink-muted)', fontWeight: 600, letterSpacing: '0.1em' }}
             >
-              {recipes.length} recipe{recipes.length === 1 ? '' : 's'}
+              {ranked.length} recipe{ranked.length === 1 ? '' : 's'}
             </p>
             <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
               {ranked.map((recipe) => (
