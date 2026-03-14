@@ -21,21 +21,39 @@ export default async function HomePage() {
                 : 'Your personal recipe collection'}
             </p>
           </div>
-          <Link
-            href="/import"
-            className="group flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all duration-200"
-            style={{
-              background: 'var(--color-terracotta)',
-              color: 'var(--color-warm-white)',
-              borderRadius: '2px',
-            }}
-            onMouseOver={undefined}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="transition-transform group-hover:-translate-y-0.5">
-              <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-            Import Recipe
-          </Link>
+          <div className="flex items-center gap-3">
+            {hasRecipes ? (
+              <Link
+                href="/cook"
+                className="text-sm font-medium transition-colors duration-200 hover:opacity-70"
+                style={{ color: 'var(--color-ink-muted)' }}
+              >
+                What can I cook?
+              </Link>
+            ) : (
+              <span
+                className="text-sm"
+                style={{ color: 'var(--color-border)', cursor: 'default' }}
+                title="Import recipes first"
+              >
+                What can I cook?
+              </span>
+            )}
+            <Link
+              href="/import"
+              className="group flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all duration-200"
+              style={{
+                background: 'var(--color-terracotta)',
+                color: 'var(--color-warm-white)',
+                borderRadius: '2px',
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="transition-transform group-hover:-translate-y-0.5">
+                <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              Import Recipe
+            </Link>
+          </div>
         </div>
       </header>
 
