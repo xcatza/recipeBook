@@ -85,7 +85,7 @@ Each recipe card:
 // shared input/output types
 
 type CookRecipe = {
-  id: number
+  id: string
   title: string
   imageUrl: string | null
   ingredients: Array<{ name: string }>
