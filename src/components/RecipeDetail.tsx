@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ServingControl } from './ServingControl'
 import { IngredientRow } from './IngredientRow'
 import { TagInput } from './TagInput'
+import { NutritionForm, type NutritionValues } from './NutritionForm'
 
 type Recipe = {
   id: string; title: string; description: string | null; imageUrl: string | null
@@ -23,6 +24,8 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
   const [notes, setNotes] = useState(recipe.notes ?? '')
   const [nutritionData, setNutritionData] = useState(recipe.nutrition)
   const [fetchingNutrition, setFetchingNutrition] = useState(false)
+  const [editingNutrition, setEditingNutrition] = useState(false)
+  const [savingNutrition, setSavingNutrition] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -92,6 +95,24 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
       }
     } finally {
       setFetchingNutrition(false)
+    }
+  }
+
+  async function handleSaveNutrition(data: NutritionValues) {
+    setSavingNutrition(true)
+    try {
+      const res = await fetch(`/api/recipes/${recipe.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nutrition: data }),
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setNutritionData(updated.nutrition)
+      }
+    } finally {
+      setSavingNutrition(false)
+      setEditingNutrition(false)
     }
   }
 
@@ -220,13 +241,31 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
 
       {/* Nutrition */}
       <section className="mb-10 animate-fade-up" style={{ animationDelay: '120ms' }}>
-        <h2
-          className="text-xs tracking-wide uppercase mb-4"
-          style={{ color: 'var(--color-ink-muted)', fontWeight: 600, letterSpacing: '0.1em' }}
-        >
-          Nutrition <span style={{ fontWeight: 400 }}>(per serving)</span>
-        </h2>
-        {nutritionData ? (
+        <div className="flex items-center justify-between mb-4">
+          <h2
+            className="text-xs tracking-wide uppercase"
+            style={{ color: 'var(--color-ink-muted)', fontWeight: 600, letterSpacing: '0.1em' }}
+          >
+            Nutrition <span style={{ fontWeight: 400 }}>(per serving)</span>
+          </h2>
+          {nutritionData && !editingNutrition && (
+            <button
+              onClick={() => setEditingNutrition(true)}
+              className="text-xs transition-colors duration-200"
+              style={{ color: 'var(--color-sage)', fontWeight: 500 }}
+            >
+              Edit
+            </button>
+          )}
+        </div>
+        {editingNutrition ? (
+          <NutritionForm
+            initialValues={nutritionData ?? {}}
+            onSave={handleSaveNutrition}
+            onCancel={() => setEditingNutrition(false)}
+            saving={savingNutrition}
+          />
+        ) : nutritionData ? (
           <div className="grid grid-cols-4 gap-3">
             {([
               ['Calories', nutritionData.calories, 'kcal'],
@@ -250,20 +289,35 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
             ))}
           </div>
         ) : (
-          <button
-            onClick={handleFetchNutrition}
-            disabled={fetchingNutrition}
-            className="flex items-center gap-2 text-sm px-4 py-2.5 transition-all duration-200 disabled:opacity-50"
-            style={{
-              color: 'var(--color-sage)',
-              border: '1px solid var(--color-sage-light)',
-              borderRadius: '2px',
-              background: 'var(--color-warm-white)',
-              fontWeight: 500,
-            }}
-          >
-            {fetchingNutrition ? 'Fetching...' : 'Fetch nutrition info'}
-          </button>
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={handleFetchNutrition}
+              disabled={fetchingNutrition}
+              className="flex items-center gap-2 text-sm px-4 py-2.5 transition-all duration-200 disabled:opacity-50"
+              style={{
+                color: 'var(--color-sage)',
+                border: '1px solid var(--color-sage-light)',
+                borderRadius: '2px',
+                background: 'var(--color-warm-white)',
+                fontWeight: 500,
+              }}
+            >
+              {fetchingNutrition ? 'Fetching...' : 'Fetch nutrition info'}
+            </button>
+            <button
+              onClick={() => setEditingNutrition(true)}
+              className="flex items-center gap-2 text-sm px-4 py-2.5 transition-all duration-200"
+              style={{
+                color: 'var(--color-ink-muted)',
+                border: '1px solid var(--color-border)',
+                borderRadius: '2px',
+                background: 'transparent',
+                fontWeight: 500,
+              }}
+            >
+              Enter manually
+            </button>
+          </div>
         )}
       </section>
 
