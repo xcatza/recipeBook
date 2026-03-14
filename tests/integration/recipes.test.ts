@@ -94,6 +94,19 @@ describe('Recipe service', () => {
     expect(reUpdated.nutrition?.calories).toBe(500)
   })
 
+  it('saveRecipe with nutrition stores it immediately', async () => {
+    const recipeWithNutrition = {
+      ...testRecipe,
+      sourceUrl: 'https://nutrition-save.com',
+      nutrition: { calories: 400, protein: 20, carbs: 50, fat: 15, fibre: 4, sugar: 8, sodium: 600 },
+    }
+    const saved = await saveRecipe(recipeWithNutrition)
+    // nutrition is stored async in saveRecipe — wait briefly
+    await new Promise((r) => setTimeout(r, 50))
+    const retrieved = await getRecipe(saved.id)
+    expect(retrieved?.nutrition).toMatchObject({ calories: 400, protein: 20 })
+  })
+
   it('stores and retrieves nutrition data', async () => {
     const saved = await saveRecipe({ ...testRecipe, sourceUrl: 'https://nutrition.com' })
     expect(saved.nutrition).toBeNull()

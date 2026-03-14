@@ -11,8 +11,9 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { recipe, tags } = await req.json()
-    const saved = await saveRecipe(recipe, tags ?? [])
+    const { recipe, tags, nutrition } = await req.json()
+    const recipeWithNutrition = nutrition !== undefined ? { ...recipe, nutrition } : { ...recipe, nutrition: null }
+    const saved = await saveRecipe(recipeWithNutrition, tags ?? [])
     return NextResponse.json(saved, { status: 201 })
   } catch {
     return NextResponse.json({ error: 'Failed to save recipe' }, { status: 500 })
