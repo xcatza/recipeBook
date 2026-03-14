@@ -143,22 +143,23 @@ export function RecipeReviewForm({ recipe, onCancel }: { recipe: ParsedRecipe; o
         </div>
         {showNutrition && (
           <NutritionForm
+            initialValues={nutrition ?? {}}
             onSave={(data) => { setNutrition(data); setShowNutrition(false) }}
             onCancel={() => { setShowNutrition(false); setNutrition(null) }}
           />
         )}
         {nutrition && !showNutrition && (
-          <p className="text-xs" style={{ color: 'var(--color-sage)' }}>
-            ✓ Nutrition added ({nutrition.calories ?? '—'} kcal)
+          <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-sage)' }}>
+            <span>✓ Nutrition added ({nutrition.calories ?? '—'} kcal)</span>
             <button
               type="button"
               onClick={() => setShowNutrition(true)}
-              className="ml-2 underline"
+              className="underline"
               style={{ color: 'var(--color-ink-muted)' }}
             >
               Edit
             </button>
-          </p>
+          </div>
         )}
       </div>
 
