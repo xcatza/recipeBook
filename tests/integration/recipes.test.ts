@@ -9,7 +9,7 @@ vi.mock('@/lib/parsers/spoonacular', () => ({
   fetchNutritionFromUrl: vi.fn().mockResolvedValue(null),
 }))
 
-import { saveRecipe, getRecipes, getRecipe, deleteRecipe, getTags, updateTags } from '@/lib/recipes'
+import { saveRecipe, getRecipes, getRecipe, deleteRecipe, getTags, updateTags, storeNutrition } from '@/lib/recipes'
 
 // Clean up test data after each test
 afterEach(async () => {
@@ -74,6 +74,24 @@ describe('Recipe service', () => {
     expect(updated.tags).toContain('quick')
     expect(updated.tags).toContain('spicy')
     expect(updated.tags).not.toContain('italian')
+  })
+
+  it('updateNutrition stores all fields and returns updated recipe', async () => {
+    const saved = await saveRecipe({ ...testRecipe, sourceUrl: 'https://nutrition-patch.com', nutrition: null })
+    expect(saved.nutrition).toBeNull()
+
+    const updated = await storeNutrition(saved.id, {
+      calories: 320, protein: 12, carbs: 40, fat: 10, fibre: 3, sugar: 5, sodium: 450,
+    })
+    expect(updated.nutrition).toMatchObject({
+      calories: 320, protein: 12, carbs: 40, fat: 10, fibre: 3, sugar: 5, sodium: 450,
+    })
+
+    // Calling again updates existing values (upsert)
+    const reUpdated = await storeNutrition(saved.id, {
+      calories: 500, protein: 25, carbs: 60, fat: 20, fibre: 6, sugar: 10, sodium: 800,
+    })
+    expect(reUpdated.nutrition?.calories).toBe(500)
   })
 
   it('stores and retrieves nutrition data', async () => {

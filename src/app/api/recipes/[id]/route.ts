@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getRecipe, updateRecipe, deleteRecipe, updateTags } from '@/lib/recipes'
+import { getRecipe, updateRecipe, deleteRecipe, updateTags, storeNutrition } from '@/lib/recipes'
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -11,6 +11,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const body = await req.json()
+  if (body.nutrition !== undefined) {
+    const recipe = await storeNutrition(id, body.nutrition)
+    return NextResponse.json(recipe)
+  }
   if (body.tags !== undefined) {
     const recipe = await updateTags(id, body.tags)
     return NextResponse.json(recipe)
