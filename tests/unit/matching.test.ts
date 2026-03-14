@@ -21,6 +21,7 @@ describe('matchRecipes', () => {
     const results = matchRecipes([pancakes, omelette, cake], [])
     expect(results.map(r => r.title)).toEqual(['Cake', 'Omelette', 'Pancakes'])
     expect(results.every(r => r.score === 0)).toBe(true)
+    expect(results.every(r => r.matchedCount === 0)).toBe(true)
   })
 
   it('scores 100% when all ingredients match', () => {
@@ -66,5 +67,12 @@ describe('matchRecipes', () => {
     const recipe = { id: 'r5', title: 'r', imageUrl: null, ingredients: [{ name: 'All-Purpose Flour' }] }
     const results = matchRecipes([recipe], [])
     expect(results[0].missingIngredients).toEqual(['All-Purpose Flour'])
+  })
+
+  it('known false positive: short pantry item matches longer unrelated ingredient (accepted behaviour per design spec)', () => {
+    // Bidirectional substring intentionally accepts "egg" matching "eggplant".
+    const recipe = { id: 'r6', title: 'r', imageUrl: null, ingredients: [{ name: 'eggplant' }] }
+    const results = matchRecipes([recipe], ['egg'])
+    expect(results[0].matchedCount).toBe(1) // intentional, not a bug
   })
 })
